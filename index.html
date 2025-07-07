@@ -1,269 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Futuristic Snake Game</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      background: radial-gradient(circle at center, #0f0f0f, #000);
-      font-family: 'Orbitron', sans-serif;
-      color: #0ff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: start;
-      min-height: 100vh;
-      padding: 20px;
-      overflow-x: hidden;
-    }
-
-    canvas {
-      background: linear-gradient(135deg, #020202 0%, #111 100%);
-      border: 2px solid #0ff;
-      border-radius: 12px;
-      box-shadow: 0 0 15px #0ff, 0 0 40px #0ff, inset 0 0 20px #0ff;
-    }
-
-    .scoreboard {
-      font-size: 20px;
-      margin-bottom: 10px;
-      text-shadow: 0 0 5px #0ff;
-    }
-
-    .controls, .theme-toggle {
-      margin: 10px 0;
-    }
-
-    .btn {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 16px;
-      margin: 5px;
-      padding: 10px 20px;
-      background: #000;
-      border: 2px solid #0ff;
-      color: #0ff;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 0 10px #0ff;
-      transition: 0.2s;
-    }
-
-    .btn:hover {
-      background: #0ff;
-      color: #000;
-      box-shadow: 0 0 20px #0ff, 0 0 40px #0ff;
-    }
-
-    .touch-controls {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 20px;
-    }
-
-    .touch-row {
-      display: flex;
-      justify-content: center;
-    }
-
-    .touch-btn {
-      width: 60px;
-      height: 60px;
-      margin: 5px;
-    }
-
-    @media (min-width: 600px) {
-      .touch-controls { display: none; }
-    }
-  </style>
+  <title>The Slytherin - Advanced Game</title>
+  <link rel="stylesheet" href="third-person-game/style.css">
 </head>
 <body>
-  <div class="scoreboard">
-    Score: <span id="score">0</span> |
-    High Score: <span id="highScore">0</span>
-  </div>
-
-  <canvas id="game" width="400" height="400"></canvas>
-
-  <div class="controls">
-    <button class="btn" id="startBtn">Start Game</button>
-    <button class="btn" id="themeBtn">Switch Theme</button>
-  </div>
-
-  <div class="touch-controls">
-    <div class="touch-row">
-      <button class="btn touch-btn" data-dir="Up">⬆️</button>
+  <header class="game-header">
+    <h1>🐍 The Slytherin</h1>
+    <div class="control-panel">
+      <button id="themeBtn" class="control-btn" title="Toggle Theme">🌙</button>
+      <button id="audioBtn" class="control-btn" title="Toggle Audio">🔊</button>
+      <button id="modeBtn" class="control-btn" title="Toggle AI Mode">🧠</button>
     </div>
-    <div class="touch-row">
-      <button class="btn touch-btn" data-dir="Left">⬅️</button>
-      <button class="btn touch-btn" data-dir="Down">⬇️</button>
-      <button class="btn touch-btn" data-dir="Right">➡️</button>
-    </div>
-  </div>
+  </header>
 
-  <audio id="eatSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9ac392f256.mp3?filename=menu-click-110126.mp3"></audio>
-  <audio id="gameOverSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1f10f4fa0e.mp3?filename=error-126627.mp3"></audio>
+  <main class="game-layout">
+    <aside class="left-panel">
+      <div class="score-section">
+        <h2>Current Game</h2>
+        <div class="score-value" id="currentScore">0</div>
+        <div class="game-status" id="gameStatus">Ready to Play</div>
+      </div>
 
-  <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    const scoreEl = document.getElementById("score");
-    const highScoreEl = document.getElementById("highScore");
-    const startBtn = document.getElementById("startBtn");
-    const themeBtn = document.getElementById("themeBtn");
-    const eatSound = document.getElementById("eatSound");
-    const gameOverSound = document.getElementById("gameOverSound");
+      <div class="controls-info">
+        <h3>Controls</h3>
+        <ul>
+          <li><kbd>SPACE</kbd> Start/Restart</li>
+          <li><kbd>↑↓←→</kbd> or <kbd>WASD</kbd> Move</li>
+          <li><kbd>P</kbd> Pause</li>
+          <li><kbd>ESC</kbd> Reset Stats</li>
+        </ul>
+      </div>
+    </aside>
 
-    const scale = 20;
-    const rows = canvas.height / scale;
-    const cols = canvas.width / scale;
+    <section class="game-area">
+      <canvas id="gameField" width="480" height="480"></canvas>
+      <div class="game-overlay" id="gameOverlay">
+        <div class="overlay-content">
+          <h2 id="overlayTitle">The Slytherin</h2>
+          <p id="overlayMessage">Press SPACE to begin your journey</p>
+          <div class="mode-indicator" id="modeIndicator">Human Player</div>
+        </div>
+      </div>
+    </section>
 
-    let snake, food, interval;
-    let score = 0;
-    let highScore = localStorage.getItem('snakeHighScore') || 0;
-    highScoreEl.textContent = highScore;
+    <aside class="right-panel">
+      <div class="stats-section">
+        <h2>Statistics</h2>
+        <div class="stat-item">
+          <span class="stat-label">Best Score</span>
+          <span class="stat-value" id="bestScore">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Games Played</span>
+          <span class="stat-value" id="totalGames">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Victories</span>
+          <span class="stat-value" id="winCount">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Success Rate</span>
+          <span class="stat-value" id="winRate">0%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Current Streak</span>
+          <span class="stat-value" id="currentStreak">0</span>
+        </div>
+      </div>
 
-    let theme = 'neon'; // can be 'neon' or 'retro'
+      <div class="achievements">
+        <h3>Achievements</h3>
+        <div class="achievement-list" id="achievementList">
+          <div class="achievement locked" id="achieve-first-win">
+            <span class="achievement-icon">🎯</span>
+            <span class="achievement-name">First Victory</span>
+          </div>
+          <div class="achievement locked" id="achieve-speed-demon">
+            <span class="achievement-icon">⚡</span>
+            <span class="achievement-name">Speed Demon</span>
+          </div>
+          <div class="achievement locked" id="achieve-ai-master">
+            <span class="achievement-icon">🤖</span>
+            <span class="achievement-name">AI Master</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
 
-    class Snake {
-      constructor() {
-        this.reset();
-      }
+  <footer class="game-footer">
+    <p>Created with ❤️ | Score 100+ points to win!</p>
+  </footer>
 
-      reset() {
-        this.x = 0;
-        this.y = 0;
-        this.xSpeed = scale;
-        this.ySpeed = 0;
-        this.tail = [];
-        this.total = 0;
-      }
-
-      draw() {
-        ctx.fillStyle = theme === 'neon' ? "#0f0" : "#ff0";
-        for (let segment of this.tail) {
-          ctx.fillRect(segment.x, segment.y, scale, scale);
-        }
-        ctx.fillRect(this.x, this.y, scale, scale);
-      }
-
-      update() {
-        for (let i = 0; i < this.tail.length - 1; i++) {
-          this.tail[i] = this.tail[i + 1];
-        }
-        if (this.total >= 1) {
-          this.tail[this.total - 1] = { x: this.x, y: this.y };
-        }
-
-        this.x += this.xSpeed;
-        this.y += this.ySpeed;
-
-        this.x = (this.x + canvas.width) % canvas.width;
-        this.y = (this.y + canvas.height) % canvas.height;
-      }
-
-      changeDirection(dir) {
-        switch (dir) {
-          case "Up":
-            if (this.ySpeed === 0) { this.xSpeed = 0; this.ySpeed = -scale; }
-            break;
-          case "Down":
-            if (this.ySpeed === 0) { this.xSpeed = 0; this.ySpeed = scale; }
-            break;
-          case "Left":
-            if (this.xSpeed === 0) { this.xSpeed = -scale; this.ySpeed = 0; }
-            break;
-          case "Right":
-            if (this.xSpeed === 0) { this.xSpeed = scale; this.ySpeed = 0; }
-            break;
-        }
-      }
-
-      eat(pos) {
-        if (this.x === pos.x && this.y === pos.y) {
-          this.total++;
-          score += 10;
-          scoreEl.textContent = score;
-          if (score > highScore) {
-            highScore = score;
-            highScoreEl.textContent = highScore;
-            localStorage.setItem('snakeHighScore', highScore);
-          }
-          eatSound.play();
-          return true;
-        }
-        return false;
-      }
-
-      checkCollision() {
-        for (let segment of this.tail) {
-          if (this.x === segment.x && this.y === segment.y) {
-            gameOverSound.play();
-            clearInterval(interval);
-            alert("💀 Game Over!");
-            score = 0;
-            scoreEl.textContent = 0;
-            this.reset();
-          }
-        }
-      }
-    }
-
-    function randomFood() {
-      return {
-        x: Math.floor(Math.random() * cols) * scale,
-        y: Math.floor(Math.random() * rows) * scale
-      };
-    }
-
-    function drawFood() {
-      ctx.fillStyle = theme === 'neon' ? "#f0f" : "#f00";
-      ctx.shadowColor = ctx.fillStyle;
-      ctx.shadowBlur = 10;
-      ctx.fillRect(food.x, food.y, scale, scale);
-      ctx.shadowBlur = 0;
-    }
-
-    function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      snake.update();
-      snake.draw();
-      drawFood();
-      if (snake.eat(food)) {
-        food = randomFood();
-      }
-      snake.checkCollision();
-    }
-
-    window.addEventListener("keydown", e => {
-      const dir = e.key.replace("Arrow", "");
-      snake.changeDirection(dir);
-    });
-
-    document.querySelectorAll(".touch-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        snake.changeDirection(btn.dataset.dir);
-      });
-    });
-
-    startBtn.addEventListener("click", () => {
-      if (interval) clearInterval(interval);
-      snake = new Snake();
-      food = randomFood();
-      score = 0;
-      scoreEl.textContent = score;
-      interval = setInterval(gameLoop, 150);
-    });
-
-    themeBtn.addEventListener("click", () => {
-      theme = theme === 'neon' ? 'retro' : 'neon';
-      document.body.style.background = theme === 'neon'
-        ? "radial-gradient(circle at center, #0f0f0f, #000)"
-        : "linear-gradient(to right, #300000, #000)";
-    });
-  </script>
+  <script src="third-person-game/main.js"></script>
 </body>
 </html>
