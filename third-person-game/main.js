@@ -1,413 +1,6 @@
 // SNAKE MASTER GAME - ADVANCED IMPLEMENTATION
 // ==========================================
 
-// INITIALIZE SNAKE_GAME_ENGINE:
-//     SET canvas dimensions (480x480)
-//     SET GRID_SIZE = 24
-//     SET TILE_COUNT = 20
-//     SET INITIAL_SPEED = 200ms
-//     SET MIN_SPEED = 80ms
-//     SET SPEED_INCREMENT = 8ms
-//     SET WIN_SCORE = 100
-    
-//     INITIALIZE game_state:
-//         running = false
-//         paused = false
-//         gameOver = false
-//         score = 0
-//         level = 1
-//         speed = INITIAL_SPEED
-    
-//     INITIALIZE snake_properties:
-//         snake = [position(10,10)]
-//         direction = (1,0)
-//         nextDirection = (1,0)
-//         food = generate_random_food()
-    
-//     INITIALIZE game_modes:
-//         isAIMode = false
-//         audioEnabled = true
-//         theme = 'dark'
-    
-//     INITIALIZE statistics:
-//         bestScore = 0
-//         totalGames = 0
-//         wins = 0
-//         currentStreak = 0
-//         achievements = empty_set
-    
-//     INITIALIZE input_system:
-//         inputBuffer = empty_array
-//         MAX_BUFFER = 3
-    
-//     INITIALIZE animation_system:
-//         lastTime = 0
-//         animationId = null
-    
-//     CALL initialize()
-
-// INITIALIZE():
-//     CALL loadGameData()
-//     CALL setupEventListeners()
-//     CALL setupAudio()
-//     CALL updateUI()
-//     CALL startRenderLoop()
-//     SHOW overlay('Snake Master', 'Press SPACE to begin your journey')
-
-// SETUP_AUDIO():
-//     INITIALIZE audioContext = null
-//     DEFINE sounds:
-//         eat: frequency=440Hz, duration=0.1s
-//         move: frequency=220Hz, duration=0.05s
-//         gameOver: frequency=150Hz, duration=0.5s
-//         win: frequency=880Hz, duration=0.3s
-//         achievement: frequency=660Hz, duration=0.2s
-    
-//     ADD event_listeners FOR user_interaction -> initAudioContext()
-
-// PLAY_SOUND(soundName):
-//     IF NOT audioEnabled OR NOT audioContext OR NOT sounds[soundName]:
-//         RETURN
-    
-//     TRY:
-//         CREATE oscillator AND gainNode
-//         CONNECT oscillator -> gainNode -> audioContext.destination
-//         SET oscillator.frequency = sounds[soundName].freq
-//         SET oscillator.type = 'square'
-//         SET gain envelope WITH exponential_ramp
-//         START oscillator
-//         STOP oscillator AFTER sounds[soundName].duration
-//     CATCH error:
-//         LOG warning
-
-// GET_AI_MOVE():
-//     GET head = snake[0]
-//     DEFINE possibleMoves = [up, down, left, right]
-    
-//     FILTER safeMoves FROM possibleMoves WHERE:
-//         newPos = head + move
-//         NOT (newPos outside canvas bounds)
-//         NOT (newPos overlaps snake segments)
-//         NOT (move is opposite to current direction)
-    
-//     IF safeMoves.length == 0:
-//         RETURN emergency_fallback_move
-    
-//     SCORE each safe_move:
-//         score = 0
-//         foodDistance = manhattan_distance(newPos, food)
-//         score += (TILE_COUNT * 2 - foodDistance) * 10
-        
-//         wallDistance = min_distance_to_walls(newPos)
-//         score += wallDistance * 5
-        
-//         IF move == current_direction:
-//             score += 15  // Prefer continuing straight
-        
-//         nearbySegments = count_snake_segments_near(newPos, radius=2)
-//         score -= nearbySegments * 3
-        
-//         RETURN {move, score}
-    
-//     SORT scoredMoves BY score DESCENDING
-//     GET bestMoves = moves WITH score >= (bestScore - 5)
-//     RETURN random_choice(bestMoves)
-
-// GENERATE_FOOD():
-//     attempts = 0
-//     maxAttempts = 100
-//     REPEAT:
-//         food = random_position(0, TILE_COUNT)
-//         attempts++
-//     UNTIL food NOT overlapping snake OR attempts >= maxAttempts
-//     RETURN food
-
-// SETUP_EVENT_LISTENERS():
-//     ADD keydown_listener -> handleKeyInput()
-//     ADD click_listener FOR themeBtn -> toggleTheme()
-//     ADD click_listener FOR audioBtn -> toggleAudio()
-//     ADD click_listener FOR modeBtn -> toggleAIMode()
-//     PREVENT default FOR [Space, ArrowKeys, WASD]
-
-// HANDLE_KEY_INPUT(event):
-//     key = event.code
-//     SWITCH key:
-//         CASE 'Space': CALL handleSpaceKey()
-//         CASE 'KeyP': CALL togglePause()
-//         CASE 'Escape': CALL resetStats()
-//         CASE 'ArrowUp' OR 'KeyW': CALL queueMove(0, -1)
-//         CASE 'ArrowDown' OR 'KeyS': CALL queueMove(0, 1)
-//         CASE 'ArrowLeft' OR 'KeyA': CALL queueMove(-1, 0)
-//         CASE 'ArrowRight' OR 'KeyD': CALL queueMove(1, 0)
-
-// HANDLE_SPACE_KEY():
-//     IF NOT gameState.running:
-//         CALL startGame()
-//     ELSE IF gameState.gameOver:
-//         CALL resetGame()
-//     ELSE:
-//         CALL togglePause()
-
-// QUEUE_MOVE(newDirection):
-//     IF NOT gameState.running OR gameState.paused OR isAIMode:
-//         RETURN
-//     IF newDirection is opposite to current_direction:
-//         RETURN
-//     IF inputBuffer.length < MAX_BUFFER:
-//         ADD newDirection TO inputBuffer
-
-// PROCESS_INPUT_BUFFER():
-//     IF inputBuffer.length > 0:
-//         move = REMOVE_FIRST(inputBuffer)
-//         IF move is NOT opposite to current_direction:
-//             SET nextDirection = move
-
-// START_GAME():
-//     SET gameState.running = true
-//     SET gameState.paused = false
-//     SET gameState.gameOver = false
-//     CALL hideOverlay()
-//     UPDATE gameStatus TO 'Playing'
-//     PLAY sound('move')
-
-// RESET_GAME():
-//     SET snake = [position(10,10)]
-//     SET direction = (1,0)
-//     SET nextDirection = (1,0)
-//     SET food = generateFood()
-//     SET gameState.score = 0
-//     SET gameState.level = 1
-//     SET gameState.speed = INITIAL_SPEED
-//     SET gameState.running = false
-//     SET gameState.paused = false
-//     SET gameState.gameOver = false
-//     CLEAR inputBuffer
-//     CALL updateUI()
-//     SHOW overlay('Snake Master', 'Press SPACE to begin your journey')
-//     UPDATE gameStatus TO 'Ready to Play'
-
-// TOGGLE_PAUSE():
-//     IF NOT gameState.running:
-//         RETURN
-//     TOGGLE gameState.paused
-//     IF gameState.paused:
-//         SHOW overlay('Paused', 'Press P or SPACE to continue')
-//         UPDATE gameStatus TO 'Paused'
-//     ELSE:
-//         CALL hideOverlay()
-//         UPDATE gameStatus TO 'Playing'
-
-// UPDATE_GAME():
-//     IF NOT gameState.running OR gameState.paused OR gameState.gameOver:
-//         RETURN
-    
-//     PROCESS input:
-//         IF isAIMode:
-//             SET nextDirection = getAIMove()
-//         ELSE:
-//             CALL processInputBuffer()
-    
-//     UPDATE direction = nextDirection
-    
-//     CALCULATE newHead = snake[0] + direction
-    
-//     CHECK wall_collision:
-//         IF newHead outside canvas_bounds:
-//             CALL endGame(false)
-//             RETURN
-    
-//     CHECK self_collision:
-//         IF newHead overlaps ANY snake_segment:
-//             CALL endGame(false)
-//             RETURN
-    
-//     ADD newHead TO front_of_snake
-    
-//     CHECK food_collision:
-//         IF newHead == food_position:
-//             CALL eatFood()
-//         ELSE:
-//             REMOVE tail_segment FROM snake
-    
-//     CHECK win_condition:
-//         IF gameState.score >= WIN_SCORE:
-//             CALL endGame(true)
-
-// EAT_FOOD():
-//     INCREMENT gameState.score BY 10
-//     SET food = generateFood()
-//     PLAY sound('eat')
-    
-//     IF gameState.score % 30 == 0:
-//         DECREASE gameState.speed BY SPEED_INCREMENT
-//         SET gameState.speed = max(MIN_SPEED, gameState.speed)
-//         SET gameState.level = floor(gameState.score / 30) + 1
-    
-//     CALL addScoreAnimation()
-//     CALL updateUI()
-
-// END_GAME(isWin):
-//     SET gameState.gameOver = true
-//     SET gameState.running = false
-//     INCREMENT stats.totalGames
-    
-//     IF isWin:
-//         INCREMENT stats.wins
-//         INCREMENT stats.currentStreak
-//         PLAY sound('win')
-//         SHOW overlay('🎉 Victory! 🎉', 'Amazing! You scored ' + gameState.score + ' points!')
-//         UPDATE gameStatus TO 'Victory!'
-//         CALL addVictoryAnimation()
-//         CALL checkAchievements('win')
-//     ELSE:
-//         SET stats.currentStreak = 0
-//         PLAY sound('gameOver')
-//         SHOW overlay('💀 Game Over 💀', 'You scored ' + gameState.score + ' points. Press SPACE to try again!')
-//         UPDATE gameStatus TO 'Game Over'
-//         CALL addGameOverAnimation()
-    
-//     IF gameState.score > stats.bestScore:
-//         SET stats.bestScore = gameState.score
-//         CALL checkAchievements('highScore')
-    
-//     CALL checkAchievements('game')
-//     CALL saveGameData()
-//     CALL updateUI()
-
-// UPDATE_UI():
-//     UPDATE currentScore_display WITH gameState.score
-//     UPDATE bestScore_display WITH stats.bestScore
-//     UPDATE totalGames_display WITH stats.totalGames
-//     UPDATE winCount_display WITH stats.wins
-//     CALCULATE winRate = (stats.wins / stats.totalGames) * 100
-//     UPDATE winRate_display WITH winRate + '%'
-//     UPDATE currentStreak_display WITH stats.currentStreak
-//     UPDATE modeIndicator WITH (isAIMode ? 'AI Player' : 'Human Player')
-//     CALL updateAchievements()
-
-// CHECK_ACHIEVEMENTS(trigger):
-//     DEFINE achievement_conditions:
-//         'first-win': stats.wins >= 1
-//         'speed-demon': gameState.score >= 150
-//         'ai-master': isAIMode AND gameState.score >= 100
-    
-//     FOR each achievement_id, condition:
-//         IF NOT stats.achievements.has(achievement_id) AND condition():
-//             CALL unlockAchievement(achievement_id)
-
-// UNLOCK_ACHIEVEMENT(id):
-//     ADD id TO stats.achievements
-//     PLAY sound('achievement')
-//     UPDATE achievement_element TO 'unlocked' state
-//     CALL showAchievementNotification(id)
-
-// TOGGLE_THEME():
-//     TOGGLE theme BETWEEN 'dark' AND 'light'
-//     SET document.data-theme = theme
-//     UPDATE themeBtn_icon TO (theme == 'dark' ? '🌙' : '☀️')
-//     CALL saveGameData()
-
-// TOGGLE_AUDIO():
-//     TOGGLE audioEnabled
-//     UPDATE audioBtn_icon TO (audioEnabled ? '🔊' : '🔇')
-//     CALL saveGameData()
-//     IF audioEnabled:
-//         PLAY sound('move')
-
-// TOGGLE_AI_MODE():
-//     TOGGLE isAIMode
-//     UPDATE modeBtn_icon TO (isAIMode ? '🤖' : '🧠')
-//     CALL updateUI()
-//     CALL saveGameData()
-//     ADD pulse_effect TO modeBtn
-
-// SAVE_GAME_DATA():
-//     CREATE gameData:
-//         stats: {...stats, achievements: Array.from(stats.achievements)}
-//         settings: {theme, audioEnabled, isAIMode}
-//     TRY:
-//         WRITE gameData TO localStorage['snakeMasterData']
-//     CATCH error:
-//         LOG warning
-
-// LOAD_GAME_DATA():
-//     TRY:
-//         READ gameData FROM localStorage['snakeMasterData']
-//         IF gameData exists:
-//             MERGE gameData.stats INTO stats
-//             CONVERT achievements_array TO Set
-//             APPLY gameData.settings TO current_settings
-//             UPDATE UI_elements WITH loaded_settings
-//     CATCH error:
-//         LOG warning
-
-// START_RENDER_LOOP():
-//     DEFINE gameLoop(currentTime):
-//         deltaTime = currentTime - lastTime
-//         IF deltaTime >= gameState.speed:
-//             CALL updateGame()
-//             SET lastTime = currentTime
-//         CALL render()
-//         SET animationId = requestAnimationFrame(gameLoop)
-//     SET animationId = requestAnimationFrame(gameLoop)
-
-// RENDER():
-//     GET theme_colors FOR current_theme
-//     CLEAR canvas WITH background_color
-    
-//     DRAW grid_lines:
-//         FOR i = 0 TO TILE_COUNT:
-//             pos = i * GRID_SIZE
-//             DRAW vertical_line AT pos
-//             DRAW horizontal_line AT pos
-    
-//     DRAW snake:
-//         FOR each segment, index IN snake:
-//             x = segment.x * GRID_SIZE
-//             y = segment.y * GRID_SIZE
-//             IF index == 0:  // Head
-//                 SET shadowColor = glow_color
-//                 SET shadowBlur = (isAIMode ? 20 : 15)
-//                 SET fillStyle = snakeHead_color
-//                 IF isAIMode:
-//                     SET shadowColor = '#ff9800'  // AI indicator
-//             ELSE:  // Body
-//                 alpha = max(0.3, 1 - (index * 0.1))
-//                 SET fillStyle = snakeBody_color + alpha_hex
-//                 SET shadowBlur = 5
-//             DRAW rectangle(x+2, y+2, GRID_SIZE-4, GRID_SIZE-4)
-    
-//     RESET shadowBlur = 0
-    
-//     DRAW food WITH pulsing_effect:
-//         time = current_milliseconds * 0.003
-//         pulse = sin(time) * 0.3 + 0.7
-//         foodSize = GRID_SIZE * pulse
-//         foodX = food.x * GRID_SIZE + (GRID_SIZE - foodSize) / 2
-//         foodY = food.y * GRID_SIZE + (GRID_SIZE - foodSize) / 2
-//         SET shadowColor = food_color
-//         SET shadowBlur = 15 + sin(time) * 5
-//         DRAW rectangle(foodX, foodY, foodSize, foodSize)
-    
-//     RESET shadowBlur = 0
-    
-//     IF gameState.running AND NOT gameState.paused:
-//         DRAW level_indicator:
-//             SET fillStyle = theme_text_color
-//             SET font = '16px monospace'
-//             DRAW text('Level ' + gameState.level, 10, 25)
-
-// MAIN_PROGRAM:
-//     WAIT FOR DOM_content_loaded
-//     TRY:
-//         CREATE new SnakeGameEngine()
-//         LOG '✅ Game initialized successfully!'
-//         SET window.snakeGame = game  // For debugging
-//     CATCH error:
-//         LOG '❌ Failed to initialize game:' + error
-
-
-
 class SnakeGameEngine {
   constructor() {
     this.canvas = document.getElementById('gameField');
@@ -455,11 +48,30 @@ class SnakeGameEngine {
     this.inputBuffer = [];
     this.MAX_BUFFER = 3;
     
+    // Touch/Mobile Properties
+    this.touchStartX = 0;
+    this.touchStartY = 0;
+    this.minSwipeDistance = 50;
+    this.isMobile = this.detectMobile();
+    
     // Animation Frame
     this.lastTime = 0;
     this.animationId = null;
     
     this.initialize();
+  }
+  
+  // Mobile Detection
+  detectMobile() {
+    const mobileCheck = 
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      ('ontouchstart' in window) ||
+      (navigator.maxTouchPoints > 0) ||
+      (window.innerWidth <= 968) ||
+      (window.innerHeight <= 600);
+    
+    console.log('📱 Mobile detection result:', mobileCheck);
+    return mobileCheck;
   }
   
   initialize() {
@@ -468,7 +80,16 @@ class SnakeGameEngine {
     this.setupAudio();
     this.updateUI();
     this.startRenderLoop();
-    this.showOverlay('Snake Master', 'Press SPACE to begin your journey');
+    
+    // Force mobile mode for testing
+    this.isMobile = true;
+    console.log('🔧 FORCED mobile mode for testing');
+    
+    const title = 'Snake Master';
+    const message = this.isMobile ? 
+      'Tap START GAME to begin!' : 
+      'Press SPACE to begin your journey';
+    this.showOverlay(title, message);
   }
   
   // Audio System
@@ -485,11 +106,21 @@ class SnakeGameEngine {
     // Initialize AudioContext on first user interaction
     document.addEventListener('click', this.initAudioContext.bind(this), { once: true });
     document.addEventListener('keydown', this.initAudioContext.bind(this), { once: true });
+    document.addEventListener('touchstart', this.initAudioContext.bind(this), { once: true });
   }
   
   initAudioContext() {
     if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      try {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (error) {
+        console.warn('Audio not supported:', error);
+      }
+    }
+    
+    // Prevent pull-to-refresh on mobile
+    if (this.isMobile) {
+      document.body.style.overscrollBehavior = 'none';
     }
   }
   
@@ -623,10 +254,22 @@ class SnakeGameEngine {
   
   // Input Management
   setupEventListeners() {
+    // Keyboard controls
     document.addEventListener('keydown', this.handleKeyInput.bind(this));
     document.getElementById('themeBtn').addEventListener('click', this.toggleTheme.bind(this));
     document.getElementById('audioBtn').addEventListener('click', this.toggleAudio.bind(this));
     document.getElementById('modeBtn').addEventListener('click', this.toggleAIMode.bind(this));
+    
+    // Mobile touch controls
+    if (this.isMobile) {
+      this.setupTouchControls();
+      this.setupSwipeControls();
+      document.body.classList.add('game-active');
+    }
+    
+    // Handle orientation changes
+    window.addEventListener('orientationchange', this.handleOrientationChange.bind(this));
+    window.addEventListener('resize', this.handleOrientationChange.bind(this));
     
     // Prevent default behavior for game keys
     document.addEventListener('keydown', (e) => {
@@ -634,6 +277,193 @@ class SnakeGameEngine {
         e.preventDefault();
       }
     });
+  }
+  
+  setupTouchControls() {
+    console.log('🔧 Setting up touch controls for mobile...');
+    console.log('📱 Mobile detected:', this.isMobile);
+    
+    // Touch button controls
+    const touchButtons = [
+      { id: 'upBtn', direction: { x: 0, y: -1 } },
+      { id: 'downBtn', direction: { x: 0, y: 1 } },
+      { id: 'leftBtn', direction: { x: -1, y: 0 } },
+      { id: 'rightBtn', direction: { x: 1, y: 0 } }
+    ];
+    
+    touchButtons.forEach(({ id, direction }) => {
+      const button = document.getElementById(id);
+      if (button) {
+        button.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          this.handleTouchMove(direction);
+          this.addTouchFeedback(e.target);
+        });
+        
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.handleTouchMove(direction);
+          this.addTouchFeedback(e.target);
+        });
+      }
+    });
+    
+    // Pause button
+    const pauseBtn = document.getElementById('pauseBtn');
+    if (pauseBtn) {
+      pauseBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        this.togglePause();
+        this.addTouchFeedback(e.target);
+      });
+      
+      pauseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.togglePause();
+        this.addTouchFeedback(e.target);
+      });
+    }
+    
+    // Mobile start button - CRITICAL FIX
+    const mobileStartBtn = document.getElementById('mobileStartBtn');
+    if (mobileStartBtn) {
+      console.log('✅ Mobile start button found and being connected!');
+      
+      // TOUCHSTART event for mobile
+      mobileStartBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('📱 Mobile start button TOUCHED!');
+        this.handleMobileStart();
+        this.addTouchFeedback(e.target);
+      }, { passive: false });
+      
+      // CLICK event for compatibility
+      mobileStartBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('🖱️ Mobile start button CLICKED!');
+        this.handleMobileStart();
+        this.addTouchFeedback(e.target);
+      });
+      
+      // Make sure button is visible on mobile
+      if (this.isMobile) {
+        mobileStartBtn.style.display = 'inline-block';
+        console.log('👀 Mobile start button made visible!');
+      }
+      
+    } else {
+      console.error('❌ CRITICAL: Mobile start button not found! Check your HTML for id="mobileStartBtn"');
+      console.log('🔍 Available elements:', document.querySelectorAll('button'));
+    }
+    
+    // Prevent scrolling on touch controls
+    document.querySelectorAll('.touch-btn, .mobile-start-btn').forEach(btn => {
+      btn.addEventListener('touchmove', (e) => e.preventDefault());
+      btn.addEventListener('touchend', (e) => e.preventDefault());
+    });
+  }
+
+  // Mobile start button handler
+  handleMobileStart() {
+    console.log('🚀 Mobile start button pressed!');
+    
+    if (!this.gameState.running) {
+      // Start or restart the game
+      if (this.gameState.gameOver) {
+        this.resetGame();
+        setTimeout(() => this.startGame(), 50);
+      } else {
+        this.startGame();
+      }
+    } else if (this.gameState.paused) {
+      // Resume paused game
+      this.togglePause();
+    } else {
+      // Pause running game
+      this.togglePause();
+    }
+  }
+
+  setupSwipeControls() {
+    const gameArea = document.getElementById('gameField');
+    
+    gameArea.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      this.touchStartX = touch.clientX;
+      this.touchStartY = touch.clientY;
+    }, { passive: false });
+    
+    gameArea.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+    
+    gameArea.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      if (!e.changedTouches[0]) return;
+      
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - this.touchStartX;
+      const deltaY = touch.clientY - this.touchStartY;
+      
+      const absDeltaX = Math.abs(deltaX);
+      const absDeltaY = Math.abs(deltaY);
+      
+      // Check if swipe is long enough
+      if (Math.max(absDeltaX, absDeltaY) < this.minSwipeDistance) {
+        // Short tap on canvas - only pause/resume if game is running
+        if (this.gameState.running) {
+          this.togglePause();
+        }
+        // Don't start game from canvas tap - use START button instead
+        return;
+      }
+      
+      // Only process swipes if game is running and not paused
+      if (!this.gameState.running || this.gameState.paused) return;
+      
+      // Determine swipe direction
+      if (absDeltaX > absDeltaY) {
+        // Horizontal swipe
+        if (deltaX > 0) {
+          this.handleTouchMove({ x: 1, y: 0 }); // Right
+        } else {
+          this.handleTouchMove({ x: -1, y: 0 }); // Left
+        }
+      } else {
+        // Vertical swipe
+        if (deltaY > 0) {
+          this.handleTouchMove({ x: 0, y: 1 }); // Down
+        } else {
+          this.handleTouchMove({ x: 0, y: -1 }); // Up
+        }
+      }
+    }, { passive: false });
+  }
+  
+  handleTouchMove(direction) {
+    if (!this.gameState.running || this.gameState.paused || this.isAIMode) return;
+    this.queueMove(direction);
+    
+    // Haptic feedback if available
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+  }
+  
+  addTouchFeedback(element) {
+    element.classList.add('touch-feedback');
+    setTimeout(() => {
+      element.classList.remove('touch-feedback');
+    }, 200);
+  }
+  
+  handleOrientationChange() {
+    setTimeout(() => {
+      this.render();
+    }, 100);
   }
   
   handleKeyInput(event) {
@@ -702,6 +532,7 @@ class SnakeGameEngine {
   
   // Game Logic
   startGame() {
+    console.log('🎮 Starting game...');
     this.gameState.running = true;
     this.gameState.paused = false;
     this.gameState.gameOver = false;
@@ -724,7 +555,12 @@ class SnakeGameEngine {
     this.inputBuffer = [];
     
     this.updateUI();
-    this.showOverlay('Snake Master', 'Press SPACE to begin your journey');
+    
+    const title = 'Snake Master';
+    const message = this.isMobile ? 
+      'Tap START GAME to begin!' : 
+      'Press SPACE to begin your journey';
+    this.showOverlay(title, message);
     this.updateGameStatus('Ready to Play');
   }
   
@@ -733,7 +569,10 @@ class SnakeGameEngine {
     
     this.gameState.paused = !this.gameState.paused;
     if (this.gameState.paused) {
-      this.showOverlay('Paused', 'Press P or SPACE to continue');
+      const message = this.isMobile ? 
+        'Game Paused' : 
+        'Press P or SPACE to continue';
+      this.showOverlay('Paused', message);
       this.updateGameStatus('Paused');
     } else {
       this.hideOverlay();
@@ -759,16 +598,16 @@ class SnakeGameEngine {
     head.x += this.direction.x;
     head.y += this.direction.y;
     
-    // Check wall collision - LOSE if hit before reaching 100
+    // Check wall collision
     if (head.x < 0 || head.x >= this.TILE_COUNT || 
         head.y < 0 || head.y >= this.TILE_COUNT) {
-      this.endGame(false); // LOSS - didn't reach 100
+      this.endGame(false);
       return;
     }
     
-    // Check self collision - LOSE if hit before reaching 100
+    // Check self collision
     if (this.snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-      this.endGame(false); // LOSS - didn't reach 100
+      this.endGame(false);
       return;
     }
     
@@ -782,9 +621,9 @@ class SnakeGameEngine {
       this.snake.pop();
     }
     
-    // Check win condition - ONLY way to win is reaching 100
+    // Check win condition
     if (this.gameState.score >= this.WIN_SCORE) {
-      this.endGame(true); // WIN - reached 100!
+      this.endGame(true);
     }
   }
   
@@ -804,29 +643,24 @@ class SnakeGameEngine {
     this.updateUI();
   }
   
-  // UPDATED: Make win/lose conditions explicit
   endGame(isWin) {
     this.gameState.gameOver = true;
     this.gameState.running = false;
     this.stats.totalGames++;
     
     if (isWin) {
-      // Player reached 100+ points = WIN
       this.stats.wins++;
       this.stats.currentStreak++;
       this.playSound('win');
-      this.showOverlay('🎉 VICTORY! 🎉', `CONGRATULATIONS! You reached ${this.gameState.score} points and WON!`);
+      const message = `CONGRATULATIONS! You reached ${this.gameState.score} points and WON!`;
+      this.showOverlay('🎉 VICTORY! 🎉', message);
       this.updateGameStatus('Victory!');
       this.addVictoryAnimation();
       this.checkAchievements('win');
     } else {
-      // Player crashed before reaching 100 = LOSS
       this.stats.currentStreak = 0;
       this.playSound('gameOver');
-      
-      // Make loss message explicit about needing 100 to win
-      const lossMessage = `You scored ${this.gameState.score} points but needed ${this.WIN_SCORE} to win! Try again!`;
-      
+      const lossMessage = `You scored ${this.gameState.score} points but needed ${this.WIN_SCORE} to win!`;
       this.showOverlay('💀 GAME OVER 💀', lossMessage);
       this.updateGameStatus('Game Over - Failed to reach 100');
       this.addGameOverAnimation();
@@ -845,10 +679,7 @@ class SnakeGameEngine {
   
   // UI Management
   updateUI() {
-    // Update score
     document.getElementById('currentScore').textContent = this.gameState.score;
-    
-    // Update statistics
     document.getElementById('bestScore').textContent = this.stats.bestScore;
     document.getElementById('totalGames').textContent = this.stats.totalGames;
     document.getElementById('winCount').textContent = this.stats.wins;
@@ -859,11 +690,9 @@ class SnakeGameEngine {
     
     document.getElementById('currentStreak').textContent = this.stats.currentStreak;
     
-    // Update mode indicator
     const modeText = this.isAIMode ? 'AI Player' : 'Human Player';
     document.getElementById('modeIndicator').textContent = modeText;
     
-    // Update achievements
     this.updateAchievements();
   }
   
@@ -873,13 +702,44 @@ class SnakeGameEngine {
   
   showOverlay(title, message) {
     const overlay = document.getElementById('gameOverlay');
+    const mobileStartBtn = document.getElementById('mobileStartBtn');
+    
     document.getElementById('overlayTitle').textContent = title;
     document.getElementById('overlayMessage').textContent = message;
+    
+    // Always show mobile button on mobile devices
+    if (this.isMobile && mobileStartBtn) {
+      mobileStartBtn.style.display = 'inline-block';
+      
+      // Update button text based on game state
+      if (!this.gameState.running && !this.gameState.gameOver) {
+        mobileStartBtn.textContent = 'START GAME';
+      } else if (this.gameState.gameOver) {
+        mobileStartBtn.textContent = 'PLAY AGAIN';
+      } else if (this.gameState.paused) {
+        mobileStartBtn.textContent = 'CONTINUE';
+      } else {
+        mobileStartBtn.textContent = 'PAUSE';
+      }
+      
+      console.log('✅ Mobile button shown:', mobileStartBtn.textContent);
+    } else if (mobileStartBtn) {
+      mobileStartBtn.style.display = 'none';
+    }
+    
     overlay.classList.remove('hidden');
   }
-  
+
   hideOverlay() {
-    document.getElementById('gameOverlay').classList.add('hidden');
+    const overlay = document.getElementById('gameOverlay');
+    const mobileStartBtn = document.getElementById('mobileStartBtn');
+    
+    overlay.classList.add('hidden');
+    
+    // Hide mobile start button when overlay is hidden
+    if (mobileStartBtn && this.isMobile) {
+      mobileStartBtn.style.display = 'none';
+    }
   }
   
   // Achievements System
@@ -907,12 +767,10 @@ class SnakeGameEngine {
       element.classList.add('unlocked');
     }
     
-    // Show notification
     this.showAchievementNotification(id);
   }
   
   showAchievementNotification(id) {
-    // Simple notification - could be enhanced with a proper notification system
     const names = {
       'first-win': 'First Victory',
       'speed-demon': 'Speed Demon', 
@@ -974,7 +832,6 @@ class SnakeGameEngine {
     this.updateUI();
     this.saveGameData();
     
-    // Visual feedback
     const button = document.getElementById('modeBtn');
     button.classList.add('pulse-effect');
     setTimeout(() => button.classList.remove('pulse-effect'), 300);
@@ -1022,7 +879,6 @@ class SnakeGameEngine {
       if (data) {
         const gameData = JSON.parse(data);
         
-        // Load stats
         if (gameData.stats) {
           this.stats = {
             ...this.stats,
@@ -1031,13 +887,11 @@ class SnakeGameEngine {
           };
         }
         
-        // Load settings
         if (gameData.settings) {
           this.theme = gameData.settings.theme || 'dark';
           this.audioEnabled = gameData.settings.audioEnabled !== false;
           this.isAIMode = gameData.settings.isAIMode || false;
           
-          // Apply settings
           document.documentElement.setAttribute('data-theme', this.theme);
           document.getElementById('themeBtn').textContent = this.theme === 'dark' ? '🌙' : '☀️';
           document.getElementById('audioBtn').textContent = this.audioEnabled ? '🔊' : '🔇';
@@ -1070,6 +924,14 @@ class SnakeGameEngine {
     const ctx = this.ctx;
     const theme = this.theme;
     
+    // Auto-resize canvas for mobile
+    if (this.isMobile) {
+      const container = this.canvas.parentElement;
+      const containerSize = Math.min(container.clientWidth - 40, container.clientHeight - 100);
+      this.canvas.style.width = containerSize + 'px';
+      this.canvas.style.height = containerSize + 'px';
+    }
+    
     // Define colors based on theme
     const colors = {
       dark: {
@@ -1089,7 +951,7 @@ class SnakeGameEngine {
         glow: 'rgba(56, 161, 105, 0.5)'
       }
     };
-    
+
     const palette = colors[theme];
     
     // Clear canvas

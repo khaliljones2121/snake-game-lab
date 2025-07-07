@@ -2,13 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Slytherin - Advanced Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Snake Master - Advanced Game</title>
   <link rel="stylesheet" href="third-person-game/style.css">
+  <meta name="theme-color" content="#0a0e1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
   <header class="game-header">
-    <h1>🐍 The Slytherin</h1>
+    <h1>🐍 Snake Master</h1>
     <div class="control-panel">
       <button id="themeBtn" class="control-btn" title="Toggle Theme">🌙</button>
       <button id="audioBtn" class="control-btn" title="Toggle Audio">🔊</button>
@@ -26,11 +29,16 @@
 
       <div class="controls-info">
         <h3>Controls</h3>
-        <ul>
+        <ul class="desktop-controls">
           <li><kbd>SPACE</kbd> Start/Restart</li>
           <li><kbd>↑↓←→</kbd> or <kbd>WASD</kbd> Move</li>
           <li><kbd>P</kbd> Pause</li>
           <li><kbd>ESC</kbd> Reset Stats</li>
+        </ul>
+        <ul class="mobile-controls">
+          <li>📱 Swipe to move</li>
+          <li>🎮 Tap controls below</li>
+          <li>⏸️ Tap pause button</li>
         </ul>
       </div>
     </aside>
@@ -39,9 +47,28 @@
       <canvas id="gameField" width="480" height="480"></canvas>
       <div class="game-overlay" id="gameOverlay">
         <div class="overlay-content">
-          <h2 id="overlayTitle">The Slytherin</h2>
+          <h2 id="overlayTitle">Snake Master</h2>
           <p id="overlayMessage">Press SPACE to begin your journey</p>
           <div class="mode-indicator" id="modeIndicator">Human Player</div>
+          <!-- CRITICAL: Mobile start button -->
+          <button class="mobile-start-btn" id="mobileStartBtn">START GAME</button>
+        </div>
+      </div>
+      
+      <!-- Mobile Touch Controls -->
+      <div class="mobile-controls-panel" id="mobileControls">
+        <div class="touch-controls">
+          <div class="control-row">
+            <button class="touch-btn" id="upBtn">↑</button>
+          </div>
+          <div class="control-row">
+            <button class="touch-btn" id="leftBtn">←</button>
+            <button class="touch-btn pause-btn" id="pauseBtn">⏸️</button>
+            <button class="touch-btn" id="rightBtn">→</button>
+          </div>
+          <div class="control-row">
+            <button class="touch-btn" id="downBtn">↓</button>
+          </div>
         </div>
       </div>
     </section>
