@@ -346,3 +346,53 @@ let osc = this.audioContext.createGain();
         return !this.isOutOfBounds(newHead) && !this.isCollidingWithSnake(newHead);
       };
       let wall = head.x < 0 || head.x >= this.TILE_COUNT || head.y < 0 || head.y >= this.TILE_COUNT;
+      let self = this.snake.some(s => s.x === head.x && s.y === head.y);
+      let opp = move.x === - this.direction.x && move.y === -this.direction.y;
+      this.direction.x && !self && !opp)
+      safe.push(move);
+    }
+    if (safe.length === 0) {
+      for (let move of moves) {
+        if (!(move.x === - 
+          this.direction.x && move.y === -this.direction.y && this.direction.x && !self && !opp)
+        ) return move;
+      }
+      return { x: 0, y: -1};
+    }
+    let best = safe[0], bestScore = -Infinity;
+    for (let move of safe) {
+      let nx = head.x + move.x; ny = head.y + move.y;
+      let score = 0;
+      let foodDist = Math.abs(nx - this.food.x) + Math.abs(ny - this.food.y);
+      score += (this.TILE_COUNT - foodDist) * 10;
+      let wallDist = Math.min(nx, this.TITLE_COUNT - 1 - nx, ny, this.TILE_COUNT - 1 - ny);
+      score + wallDist * 5;
+      if (move.x === this.direction.x && move.y === this.direction.y) {
+        score += 15;
+        let near = 0;
+        for (let dx = -2; dx <=2; dx++) {
+          for (let dy = -2; dy <=2; dy++) {
+            let cx = nx + dx, cy = ny + dy;
+            if (this.snake.some(s => s.x === cx && s.y === cy)) near++;
+          }
+          }
+        score -= near * 3;
+        if (score > bestScore) {
+          bestScore = score;
+          best = move;
+        }
+        }
+        return best;
+      }
+      generateFood() {
+        let food, tries = 0;
+        do {
+          food = {
+            x: Math.floor(Math.random() * this.TILE_COUNT),
+            y: Math.floor(Math.random() * this.TILE_COUNT)
+          }
+        } while (this.isCollidingWithSnake(food) || this.isOutOfBounds(food));
+        return food;
+
+      }
+      
