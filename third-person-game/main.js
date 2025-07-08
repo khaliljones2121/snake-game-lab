@@ -269,4 +269,80 @@ this.stats = {
   this.inputBuffer = [];
   this.Max_Buffer = 3;
 
-  //
+  // Animation
+  this.lastTime = 0;
+  this.animationId = null;
+}
+
+domInitialize() {
+  this.canvas = document.getElementById('gameField');
+  this.ctx = this.canvas.getContext('2d');
+  this.canvas.width = this.GRID_SIZE * this.TILE_COUNT;
+  this.food = this.generateFood();
+  this.domInitialize();
+}
+
+initialize() {
+  this.loadGameData();
+  this.setupEventListeners();
+  this.setupAudio();
+  this.updateUI();
+  this.startRenderLoop();
+}
+
+let title = 'The Slytherin';
+let message = 'Press SPACE to start';
+this.showOverlay(title, message);
+}
+
+setupAudio() {
+  this.audioContent = null;
+  this.sounds = {
+    eat: { freq: 220, duration: 0.1 },
+    move: { freq: 440, duration: 0.1 },
+    gameOver: { freq: 150, duration: 0.5 },
+    win: { freq: 880, duration: 0.3 },
+    achievement: { freq: 660, duration: 0.2 },
+  };
+
+  document.addEventListener('click', this.initAudio.bind(this), { once: true });
+
+  document.addEventListener('keydown', this.initAudio.bind(this), { once: true });
+  document.addEventListener('touchstart', this.initAudio.bind(this), { once: true });
+}
+
+initAudioContext() {
+  if (!this.audioContext) {
+    let AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      this.audioContext = new AudioCtx();
+    }
+  }
+  playSound(name) {
+    if (!this.audioEnabled || !this.audioContext || !this.sounds[name]) {
+      return;
+let osc = this.audioContext.createGain();
+      osc.connect(gain);
+
+      gain.connect(this.audioContext.destination);
+      let sound = this.sound[name];
+      osc.frequency.setValueAtTime(sound.freq, this.audioContext.currentTime);
+      osc.type = 'square';
+      gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + sound.duration);
+      osc.start(this.audioContext.currentTime);
+      osc.stop(this.audioContext.currentTime + sound.duration); 
+    }
+  
+    getAIMove() {
+      let head = this.snake[0];
+      let moves = [
+        { x: 0, y: -1},
+        { x: 0, y: 1},
+        { x: -1, y: 0},
+        { x: 1, y: 0}
+      ];
+      let safe = (move) => {
+        let newHead = { x: head.x + move.x, y: head.y + move.y };
+        return !this.isOutOfBounds(newHead) && !this.isCollidingWithSnake(newHead);
+      };
+      let wall = head.x < 0 || head.x >= this.TILE_COUNT || head.y < 0 || head.y >= this.TILE_COUNT;
