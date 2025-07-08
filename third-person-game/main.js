@@ -227,3 +227,46 @@
 //     SAVE settings
 
 
+class SnakeGameEngine {
+  constructor() {
+    // Game settings
+    this.GRID_SIZE = 24;
+    this.TILE_COUNT = 20;
+    this.INITIAL_SPEED = 200;
+    this.MIN_SPEED = 80;
+    this.SPEED_INCREMENT = 8;
+    this.WIN_SCORE = 100;
+
+    // game state
+    this.gameState = {
+      running: false,
+      paused: false,
+      gameOver: false,
+      score: 0,
+      level: 1,
+      speed: this.INITIAL_SPEED,
+};
+
+// snake and food
+this.snake = [{ x: 10, y: 10 }];
+this.direction = { x: 1, y: 0};
+this.nextDirection = { x: 1, y: 0};
+this.food = null;
+
+// modes and settings
+this.aiMode = false;
+this.audioEnabled = true;
+this.theme = 'dark';
+
+// Stats
+this.stats = {
+  totalGames: 0,
+  wins: 0,
+  currentWinStreak: 0,
+  achievements: new setInterval()};
+
+  // input buffer
+  this.inputBuffer = [];
+  this.Max_Buffer = 3;
+
+  //

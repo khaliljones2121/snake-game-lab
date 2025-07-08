@@ -2,10 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>The Slytherin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="third-person-game/style.css">
+  <meta name="theme-color" content="#0a0e1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
-  
+ <meta charset="UTF-8">
+  <title>The Slytherin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="third-person-game/style.css">
+  <meta name="theme-color" content="#0a0e1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> 
+</header>
+  <main class="game-layout">
+    <aside class="left-panel">
+      <div class="score-section">
+        <h2>Current Game</h2>
+        <div class="score-value" id="currentScore">0</div>
+        <div class="game-status" id="gameStatus">Ready to Play</div>
+      </div>
+      <div class="controls-info">
+        <h3>Controls</h3>
+        <ul class="desktop-controls">
+          <li><kbd>SPACE</kbd> Start/Restart</li>
+          <li><kbd>↑↓←→</kbd> or <kbd>WASD</kbd> Move</li>
+          <li><kbd>P</kbd> Pause</li>
+          <li><kbd>ESC</kbd> Reset Stats</li>
+        </ul>
+        <ul class="mobile-controls">
+          <li>📱 Swipe to move</li>
+          <li>🎮 Tap controls below</li>
+          <li>⏸️ Tap pause button</li>
+        </ul>
+      </div>
+    </aside>
+
+    <section class="game-area">
+      <canvas id="gameField" width="480" height="480"></canvas>
+      <div class="game-overlay" id="gameOverlay">
+        <div class="overlay-content">
+          <h2 id="overlayTitle">The Slytherin</h2>
+          <p id="overlayMessage">Press SPACE to begin your journey</p>
+          <div class="mode-indicator" id="modeIndicator">Human Player</div>
+          <!-- CRITICAL: Mobile start button -->
+          <button class="mobile-start-btn" id="mobileStartBtn">START GAME</button>
+        </div>
+      </div>
+
+      <!-- Mobile Touch Controls -->
+      <div class="mobile-controls-panel" id="mobileControls">
+        <div class="touch-controls">
+          <div class="control-row">
+            <button class="touch-btn" id="upBtn">↑</button>
+          </div>
+          <div class="control-row">
+            <button class="touch-btn" id="leftBtn">←</button>
+            <button class="touch-btn pause-btn" id="pauseBtn">⏸️</button>
+            <button class="touch-btn" id="rightBtn">→</button>
+          </div>
+          <div class="control-row">
+            <button class="touch-btn" id="downBtn">↓</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <aside class="right-panel">
+      <div class="stats-section">
+        <h2>Statistics</h2>
+        <div class="stat-item">
+          <span class="stat-label">Best Score</span>
+          <span class="stat-value" id="bestScore">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Games Played</span>
+          <span class="stat-value" id="totalGames">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Victories</span>
+          <span class="stat-value" id="winCount">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Success Rate</span>
+          <span class="stat-value" id="winRate">0%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Current Streak</span>
+          <span class="stat-value" id="currentStreak">0</span>
+        </div>
+      </div>
+
+      <div class="achievements">
+        <h3>Achievements</h3>
+        <div class="achievement-list" id="achievementList">
+          <div class="achievement locked" id="achieve-first-win">
+            <span class="achievement-icon">🎯</span>
+            <span class="achievement-name">First Victory</span>
+          </div>
+          <div class="achievement locked" id="achieve-speed-demon">
+            <span class="achievement-icon">⚡</span>
+            <span class="achievement-name">Speed Demon</span>
+          </div>
+          <div class="achievement locked" id="achieve-ai-master">
+            <span class="achievement-icon">🤖</span>
+            <span class="achievement-name">AI Master</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+  <footer class="game-footer">
+    <p>Created with ❤️ | Score 100+ points to win!</p>
+  </footer>
+
+  <script src="third-person-game/main.js"></script>
 </body>
 </html>
